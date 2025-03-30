@@ -419,15 +419,7 @@ function goToDiary() {
     document.getElementById('diary-screen').classList.add('active');
 }
 
-function finishGame() {
-    const diaryText = document.getElementById('diary-text').value.trim();
-    
-    if (!diaryText) {
-        alert('Por favor, escreva algo em seu diário antes de finalizar.');
-        return;
-    }
-    
-    // Coletar todos os dados do jogo
+async function finishGame() {
     const gameData = {
         currentUser: localStorage.getItem('currentUser'),
         playerName: localStorage.getItem('playerName'),
@@ -435,36 +427,35 @@ function finishGame() {
         tristeza: localStorage.getItem('tristeza'),
         palavraEscolhida: localStorage.getItem('palavraEscolhida'),
         significado: localStorage.getItem('significado'),
-        diario: diaryText,
-        pontuacao: currentScore,
+        diario: document.getElementById('diary-text').value,
+        pontuacao: localStorage.getItem('currentScore'),
         dataSubmissao: new Date().toISOString()
     };
 
-    // Criar o formulário para envio
-    const form = new FormData();
-    form.append('form-name', 'game-progress');
-    Object.entries(gameData).forEach(([key, value]) => {
-        form.append(key, value);
-    });
+    try {
+        const response = await fetch('/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'form-name': 'game-progress',
+                ...gameData
+            })
+        });
 
-    // Enviar dados para o Netlify Forms
-    fetch('/', {
-        method: 'POST',
-        body: form
-    })
-    .then(response => {
         if (!response.ok) {
             throw new Error('Erro ao salvar dados');
         }
-        // Atualizar a tela final
-        document.getElementById('diary-screen').classList.remove('active');
-        document.getElementById('final-screen').classList.add('active');
-        document.querySelector('.final-score').textContent = currentScore;
-    })
-    .catch(error => {
-        console.error('Erro ao salvar dados:', error);
-        alert('Ocorreu um erro ao salvar suas respostas, mas você completou o jogo!');
-    });
+
+        // Mostrar tela final
+        showScreen('final-screen');
+        document.querySelector('.final-score').textContent = localStorage.getItem('currentScore');
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Ocorreu um erro ao salvar seus dados. Por favor, tente novamente.');
+    }
 }
 
 // Definir os usuários válidos
