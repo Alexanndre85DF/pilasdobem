@@ -8,6 +8,10 @@ let responses = []; // Variável global para armazenar as respostas
 // Configuração inicial
 const NETLIFY_SITE_ID = 'seu-site-id-aqui'; // Substitua pelo ID do seu site
 
+// Token de acesso ao Netlify (deve ser configurado nas variáveis de ambiente)
+const NETLIFY_TOKEN = process.env.NETLIFY_ACCESS_TOKEN;
+const SITE_ID = process.env.SITE_ID; // ID do seu site no Netlify
+
 // Função de login administrativo
 function adminLogin() {
     const login = document.getElementById('admin-login').value;
@@ -33,44 +37,49 @@ async function loadFormSubmissions() {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('Erro ao carregar dados');
         }
-        
+
         const data = await response.json();
         displayData(data);
+        updateUserFilter(data);
     } catch (error) {
         console.error('Erro:', error);
-        alert('Erro ao carregar os dados. Por favor, tente novamente.');
+        alert('Erro ao carregar os dados. Por favor, recarregue a página.');
     }
 }
 
 // Função para exibir os dados na tabela
 function displayData(submissions) {
-    const tableBody = document.getElementById('dataTableBody');
+    const tableBody = document.getElementById('data-table');
     tableBody.innerHTML = '';
-    
+
     submissions.forEach(submission => {
         const row = document.createElement('tr');
+        const date = new Date(submission.data.dataSubmissao);
+        
         row.innerHTML = `
-            <td>${new Date(submission.created_at).toLocaleDateString()}</td>
+            <td>${date.toLocaleDateString()}</td>
             <td>${submission.data.currentUser}</td>
             <td>${submission.data.playerName}</td>
             <td>${submission.data.pontuacao}</td>
-            <td>
-                <button onclick="viewDetails('${submission.id}')">Ver Detalhes</button>
+            <td class="actions">
+                <button onclick="viewDetails('${submission.id}')" class="view-btn">Ver Detalhes</button>
             </td>
         `;
+        
         tableBody.appendChild(row);
     });
 }
 
 // Função para filtrar os dados
 function filterData() {
-    const dateFilter = document.getElementById('dateFilter').value;
-    const userFilter = document.getElementById('userFilter').value;
-    // Implementar lógica de filtro aqui
+    const dateFilter = document.getElementById('date-filter').value;
+    const userFilter = document.getElementById('user-filter').value;
+    
+    loadFormSubmissions(dateFilter, userFilter);
 }
 
 // Carregar dados quando a página for carregada
@@ -107,13 +116,15 @@ async function loadResponses() {
     }
 }
 
-function updateUserFilter(data) {
+function updateUserFilter(submissions) {
     const userFilter = document.getElementById('user-filter');
-    const users = [...new Set(data.map(r => r.data.currentUser))];
+    const users = [...new Set(submissions.map(s => s.data.currentUser))];
     
-    userFilter.innerHTML = '<option value="">Todos os usuários</option>';
     users.forEach(user => {
-        userFilter.innerHTML += `<option value="${user}">${user}</option>`;
+        const option = document.createElement('option');
+        option.value = user;
+        option.textContent = user;
+        userFilter.appendChild(option);
     });
 }
 
@@ -170,45 +181,34 @@ function displayResponses(submissions) {
 }
 
 // Visualizar detalhes de uma resposta
-function viewDetails(submissionId) {
-    const submission = responses.find(r => r.id === submissionId);
-    if (!submission) {
-        alert('Detalhes não encontrados');
-        return;
+async function viewDetails(submissionId) {
+    try {
+        const response = await fetch(`/.netlify/functions/get-submission?id=${submissionId}`);
+        const submission = await response.json();
+        
+        const modal = document.getElementById('details-modal');
+        const content = document.getElementById('modal-content');
+        
+        content.innerHTML = `
+            <h2>Detalhes da Submissão</h2>
+            <p><strong>Data:</strong> ${new Date(submission.data.dataSubmissao).toLocaleString()}</p>
+            <p><strong>Usuário:</strong> ${submission.data.currentUser}</p>
+            <p><strong>Nome do Jogador:</strong> ${submission.data.playerName}</p>
+            <p><strong>Pontuação:</strong> ${submission.data.pontuacao}</p>
+            <h3>Respostas:</h3>
+            <p><strong>Felicidade:</strong> ${submission.data.felicidade}</p>
+            <p><strong>Tristeza:</strong> ${submission.data.tristeza}</p>
+            <p><strong>Palavra Escolhida:</strong> ${submission.data.palavraEscolhida}</p>
+            <p><strong>Significado:</strong> ${submission.data.significado}</p>
+            <h3>Diário:</h3>
+            <p>${submission.data.diario}</p>
+        `;
+        
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('Erro ao carregar detalhes:', error);
+        alert('Erro ao carregar os detalhes. Tente novamente.');
     }
-
-    const detailsContent = document.getElementById('details-content');
-    detailsContent.innerHTML = `
-        <h3>Detalhes da Submissão</h3>
-        <div class="response-details">
-            <div class="detail-group">
-                <h4>Informações Gerais</h4>
-                <p><strong>Data:</strong> ${new Date(submission.created_at).toLocaleString()}</p>
-                <p><strong>Usuário:</strong> ${submission.data.currentUser || 'N/A'}</p>
-                <p><strong>Nome do Jogador:</strong> ${submission.data.playerName || 'N/A'}</p>
-                <p><strong>Pontuação Final:</strong> ${submission.data.pontuacao || '0'}</p>
-            </div>
-            
-            <div class="detail-group">
-                <h4>Respostas do Jogo</h4>
-                <p><strong>Palavra de Felicidade:</strong> ${submission.data.felicidade || 'N/A'}</p>
-                <p><strong>Palavra de Tristeza:</strong> ${submission.data.tristeza || 'N/A'}</p>
-                <p><strong>Palavra Escolhida:</strong> ${submission.data.palavraEscolhida || 'N/A'}</p>
-                <p><strong>Significado da Palavra:</strong> ${submission.data.significado || 'N/A'}</p>
-            </div>
-            
-            <div class="detail-group">
-                <h4>Diário do Vencedor</h4>
-                <div class="diary-content">
-                    ${submission.data.diario || 'Sem conteúdo'}
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.querySelectorAll('.admin-screen').forEach(screen => 
-        screen.classList.remove('active'));
-    document.getElementById('response-details').classList.add('active');
 }
 
 // Funções de navegação
@@ -221,4 +221,12 @@ function showDashboard() {
 function logout() {
     localStorage.removeItem('adminUser');
     location.reload();
+}
+
+// Fechar modal quando clicar fora dele
+window.onclick = function(event) {
+    const modal = document.getElementById('details-modal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
 } 
