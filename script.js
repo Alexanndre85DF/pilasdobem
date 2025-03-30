@@ -420,54 +420,56 @@ function goToDiary() {
 }
 
 async function finishGame() {
-    // Salvar a pontuação atual no localStorage antes de enviar
-    localStorage.setItem('currentScore', currentScore.toString());
+    // Salvar o texto do diário
+    const diarioText = document.getElementById('diary-text').value;
+    localStorage.setItem('diario', diarioText);
     
-    const gameData = {
-        currentUser: localStorage.getItem('currentUser'),
-        playerName: localStorage.getItem('playerName'),
-        felicidade: localStorage.getItem('felicidade'),
-        tristeza: localStorage.getItem('tristeza'),
-        palavraEscolhida: localStorage.getItem('palavraEscolhida'),
-        significado: localStorage.getItem('significado'),
-        diario: document.getElementById('diary-text').value,
-        pontuacao: currentScore,
-        dataSubmissao: new Date().toISOString()
-    };
-
-    console.log('Dados sendo enviados:', gameData);
+    // Preparar os dados do formulário
+    const formData = new URLSearchParams();
+    formData.append('form-name', 'game-progress');
+    formData.append('currentUser', localStorage.getItem('currentUser') || '');
+    formData.append('playerName', localStorage.getItem('playerName') || '');
+    formData.append('felicidade', localStorage.getItem('felicidade') || '');
+    formData.append('tristeza', localStorage.getItem('tristeza') || '');
+    formData.append('palavraEscolhida', localStorage.getItem('palavraEscolhida') || '');
+    formData.append('significado', localStorage.getItem('significado') || '');
+    formData.append('diario', diarioText);
+    formData.append('pontuacao', currentScore.toString());
+    formData.append('dataSubmissao', new Date().toISOString());
 
     try {
-        const formData = new FormData();
-        formData.append('form-name', 'game-progress');
-        
-        // Adicionar cada campo ao FormData
-        Object.keys(gameData).forEach(key => {
-            formData.append(key, gameData[key]);
-        });
-
         const response = await fetch('/', {
             method: 'POST',
             headers: {
-                "Accept": "application/x-www-form-urlencoded;charset=UTF-8",
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: formData
+            body: formData.toString()
         });
 
         if (!response.ok) {
-            throw new Error('Erro ao salvar dados');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Mostrar tela final
+        // Se chegou aqui, salvou com sucesso
+        // Atualizar a pontuação final
+        document.querySelector('.final-score').textContent = currentScore;
+
+        // Esconder a tela do diário e mostrar a tela final
         document.getElementById('diary-screen').classList.remove('active');
         document.getElementById('final-screen').classList.add('active');
-        document.querySelector('.final-score').textContent = currentScore;
-        
+
     } catch (error) {
-        console.error('Erro detalhado:', error);
-        console.log('Status da resposta:', error.response?.status);
-        console.log('Texto do erro:', error.response?.statusText);
-        alert('Ocorreu um erro ao salvar seus dados. Por favor, tente novamente.');
+        console.error('Erro ao salvar:', error);
+        // Tentar salvar novamente
+        const retry = confirm('Ocorreu um erro ao salvar seus dados. Deseja tentar novamente?');
+        if (retry) {
+            await finishGame();
+        } else {
+            // Mesmo se falhar o salvamento, permitir que o usuário continue
+            document.getElementById('diary-screen').classList.remove('active');
+            document.getElementById('final-screen').classList.add('active');
+            document.querySelector('.final-score').textContent = currentScore;
+        }
     }
 }
 
