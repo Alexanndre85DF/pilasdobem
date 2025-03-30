@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - PILAS DO BEM</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Painel Administrativo</h1>
+        
+        <div class="filters">
+            <input type="date" id="dateFilter">
+            <select id="userFilter">
+                <option value="">Todos os usuários</option>
+            </select>
+            <button onclick="filterData()">Filtrar</button>
+        </div>
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Usuário</th>
+                    <th>Nome do Jogador</th>
+                    <th>Pontuação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="dataTableBody">
+                <!-- Dados serão inseridos aqui via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    <script src="admin.js"></script>
+    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</body>
+</html> 

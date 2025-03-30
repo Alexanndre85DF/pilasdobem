@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PILAS DO BEM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <form name="game-progress" netlify netlify-honeypot="bot-field" hidden>
+        <input type="text" name="currentUser" />
+        <input type="text" name="playerName" />
+        <input type="text" name="felicidade" />
+        <input type="text" name="tristeza" />
+        <input type="text" name="palavraEscolhida" />
+        <input type="text" name="significado" />
+        <input type="text" name="diario" />
+        <input type="number" name="pontuacao" />
+        <input type="text" name="dataSubmissao" />
+    </form>
+    <div id="game-container">
+        <div class="top-left-container">
+            <div id="score-display" class="score-container">
+                <span>Pontuação: </span>
+                <span id="current-score">0</span>
+            </div>
+            <div class="side-buttons">
+                <button onclick="showInstructions()" class="side-btn">INSTRUÇÕES</button>
+                <button onclick="showPresentation()" class="side-btn">APRESENTAÇÃO</button>
+            </div>
+        </div>
+
+        <div id="initial-screen" class="screen active">
+            <h1>PEQUENOS GRANDES PASSOS</h1>
+            <h2>PILAS DO BEM</h2>
+            <div class="login-container">
+                <div class="input-group">
+                    <input type="text" id="login-input" placeholder="Digite seu login" class="login-input">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password-input" placeholder="Digite sua senha" class="password-input">
+                </div>
+                <p id="login-error" class="login-error"></p>
+                <button onclick="checkLogin()" class="start-btn">INICIAR</button>
+            </div>
+            <p class="credits">Criado por Alexandre Tolentino @2025</p>
+        </div>
+
+        <div id="presentation-screen" class="screen">
+            <h2>APRESENTAÇÃO</h2>
+            <div class="presentation-content">
+                <p>O projeto Pilas do Bem foi idealizado para crianças e adolescentes entre 06 e 18 anos que participam do Serviço de Convivência e Fortalecimento de Vínculos (SCFV). Seu principal objetivo é fortalecer valores essenciais para a vida em sociedade, como respeito, cooperação, autonomia e responsabilidade, ao mesmo tempo em que estimula a educação financeira, o consumo consciente e a valorização do trabalho.</p>
+
+                <p>A iniciativa utiliza um sistema inovador de recompensas por meio dos "pilas", uma moeda fictícia que reconhece e valoriza boas atitudes, participação ativa e cumprimento de regras dentro das atividades do SCFV. Com os "pilas" adquiridos, os participantes podem realizar trocas na Feirinha Mensal, onde têm acesso a brinquedos, materiais escolares, alimentos e até passeios especiais. Essa dinâmica promove não apenas a aprendizagem sobre o uso responsável dos recursos, mas também estimula a tomada de decisões e o planejamento financeiro.</p>
+
+                <h3>Integração do Jogo "Pilas do Bem"</h3>
+                <p>Como forma de ampliar o impacto do projeto e tornar a experiência mais dinâmica e interativa, foi desenvolvido o jogo "Pilas do Bem". Este game digital busca complementar as atividades presenciais do SCFV, proporcionando um ambiente lúdico e educativo onde as crianças e adolescentes podem explorar conceitos de emoções, valores, autoestima, educação financeira e tomada de decisões de maneira gamificada.</p>
+
+                <p>O jogo apresenta desafios e missões que incentivam os participantes a refletirem sobre suas ações e sentimentos, além de promover atividades matemáticas e de raciocínio lógico que reforçam o aprendizado. Por meio de interações dentro do jogo, os participantes podem expressar suas emoções, identificar situações que os deixam felizes ou tristes, e até mesmo relatar experiências que podem ajudar os educadores a perceber sinais de vulnerabilidade.</p>
+            </div>
+            <button onclick="hidePresentation()" class="start-btn">VOLTAR</button>
+        </div>
+
+        <div id="instructions-screen" class="screen">
+            <h2>INSTRUÇÕES DO JOGO</h2>
+            <div class="instructions-content">
+                <section class="instruction-section">
+                    <h3>Como Jogar</h3>
+                    <p>Bem-vindo ao Pilas do Bem! Este é um jogo educativo onde você vai expressar seus sentimentos e aprender enquanto se diverte.</p>
+                </section>
+
+                <section class="instruction-section">
+                    <h3>Sistema de Pontuação</h3>
+                    <ul>
+                        <li><strong>Nome e Boas-vindas:</strong> +50 pontos por começar sua jornada</li>
+                        <li><strong>Palavra de Felicidade:</strong> +100 pontos por formar uma palavra corretamente</li>
+                        <li><strong>Palavra de Tristeza:</strong> +100 pontos por formar uma palavra corretamente</li>
+                        <li><strong>Escolha de Emoção:</strong> 
+                            <ul>
+                                <li>Começa com 600 pontos</li>
+                                <li>-10 pontos por cada erro ortográfico</li>
+                            </ul>
+                        </li>
+                        <li><strong>Matemática:</strong> +100 pontos para cada problema resolvido corretamente (máximo 500 pontos)</li>
+                        <li><strong>Jogo da Memória:</strong>
+                            <ul>
+                                <li>+50 pontos por cada par encontrado</li>
+                                <li>Bônus de +200 pontos por completar o jogo</li>
+                            </ul>
+                        </li>
+                        <li><strong>Diário:</strong>
+                            <ul>
+                                <li>Começa com 1000 pontos</li>
+                                <li>-10 pontos por cada erro ortográfico</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <button onclick="hideInstructions()" class="start-btn">VOLTAR</button>
+        </div>
+
+        <div id="welcome-screen" class="screen">
+            <h2>Bem-vindo ao Pilas do Bem!</h2>
+            <p class="welcome-text">
+                Aqui você vai embarcar em uma jornada incrível de descobertas e aprendizado!
+                Vamos juntos construir um mundo melhor através de boas ações e muito conhecimento.
+            </p>
+            <div class="name-input-container">
+                <label for="player-name">Como podemos te chamar?</label>
+                <input type="text" id="player-name" placeholder="Digite seu nome aqui">
+            </div>
+            <button onclick="goToNextScreen()" class="start-btn">SEGUIR</button>
+        </div>
+
+        <div id="alphabet-screen" class="screen">
+            <h2>O que te faz se sentir feliz?</h2>
+            <div id="alphabet-container">
+                <!-- As letras serão geradas via JavaScript -->
+            </div>
+            <div class="control-buttons">
+                <button onclick="addSpace('answer-box')" class="control-btn space-btn">ESPAÇO</button>
+                <button onclick="deleteLastLetter('answer-box')" class="control-btn delete-btn">APAGAR</button>
+            </div>
+            <div id="word-container">
+                <div id="answer-box"></div>
+            </div>
+            <button onclick="checkAnswer()" class="start-btn">SEGUIR</button>
+        </div>
+
+        <div id="sadness-screen" class="screen">
+            <h2>O que te faz se sentir triste?</h2>
+            <div id="sadness-alphabet-container">
+                <!-- As letras serão geradas via JavaScript -->
+            </div>
+            <div class="control-buttons">
+                <button onclick="addSpace('sadness-answer-box')" class="control-btn space-btn">ESPAÇO</button>
+                <button onclick="deleteLastLetter('sadness-answer-box')" class="control-btn delete-btn">APAGAR</button>
+            </div>
+            <div id="sadness-word-container">
+                <div id="sadness-answer-box"></div>
+            </div>
+            <button onclick="checkSadnessAnswer()" class="start-btn">SEGUIR</button>
+        </div>
+
+        <div id="drag-words-screen" class="screen">
+            <h2>Escolha uma palavra e nos diga o que ela significa para você</h2>
+            <div id="words-container">
+                <!-- Palavras positivas e negativas -->
+                <div class="word-option" draggable="true">AMOR</div>
+                <div class="word-option" draggable="true">FAMÍLIA</div>
+                <div class="word-option" draggable="true">AMIZADE</div>
+                <div class="word-option" draggable="true">MEDO</div>
+                <div class="word-option" draggable="true">RAIVA</div>
+                <div class="word-option" draggable="true">ALEGRIA</div>
+                <div class="word-option" draggable="true">TRISTEZA</div>
+                <div class="word-option" draggable="true">ESPERANÇA</div>
+            </div>
+            <div id="word-drop-zone">
+                Arraste uma palavra para cá
+            </div>
+            <div id="meaning-container" style="display: none;">
+                <h3>O que esta palavra representa para você?</h3>
+                <textarea id="word-meaning" rows="4" placeholder="Escreva aqui..."></textarea>
+            </div>
+            <button onclick="checkWordMeaning()" class="start-btn">SEGUIR</button>
+        </div>
+
+        <div id="math-screen" class="screen">
+            <h2>RESOLVA ESTA MATEMÁTICA</h2>
+            <div id="math-problems-container">
+                <div class="math-problem">
+                    <p>Se você tem 3 amigos e cada um trouxe 2 brinquedos para compartilhar, quantos brinquedos vocês têm para brincar juntos?</p>
+                    <div class="answer-input">
+                        <input type="number" class="math-input" data-answer="6">
+                        <span>brinquedos</span>
+                    </div>
+                </div>
+                <div class="math-problem">
+                    <p>Na sua festa de aniversário vieram 4 famílias e cada família trouxe 3 pessoas. Quantas pessoas vieram à sua festa?</p>
+                    <div class="answer-input">
+                        <input type="number" class="math-input" data-answer="12">
+                        <span>pessoas</span>
+                    </div>
+                </div>
+                <div class="math-problem">
+                    <p>Se você quer distribuir 15 balas igualmente entre você e mais 2 amigos, quantas balas cada um vai receber?</p>
+                    <div class="answer-input">
+                        <input type="number" class="math-input" data-answer="5">
+                        <span>balas cada</span>
+                    </div>
+                </div>
+                <div class="math-problem">
+                    <p>Você tem 4 caixas de lápis de cor e em cada caixa há 6 lápis. Quantos lápis você tem no total?</p>
+                    <div class="answer-input">
+                        <input type="number" class="math-input" data-answer="24">
+                        <span>lápis</span>
+                    </div>
+                </div>
+                <div class="math-problem">
+                    <p>Se você guardar 2 moedas por dia durante 7 dias, quantas moedas você terá juntado?</p>
+                    <div class="answer-input">
+                        <input type="number" class="math-input" data-answer="14">
+                        <span>moedas</span>
+                    </div>
+                </div>
+            </div>
+            <div id="motivation-message" style="display: none;">
+                <h3>Parabéns! Você é incrível!</h3>
+                <p>Continue sempre acreditando em você!</p>
+            </div>
+            <button onclick="checkMathAnswers()" class="start-btn">SEGUIR</button>
+        </div>
+
+        <div id="memory-game-screen" class="screen">
+            <h2>JOGO DA MEMÓRIA DAS EMOÇÕES</h2>
+            <p class="game-intro">Encontre os pares de emoções iguais!</p>
+            <div id="memory-game-container">
+                <!-- As cartas serão geradas via JavaScript -->
+            </div>
+            <div id="memory-message" style="display: none;">
+                <h3>Muito bem! Você completou o jogo!</h3>
+                <p>Você entende muito bem as emoções!</p>
+            </div>
+            <button onclick="goToDiary()" class="start-btn" style="display: none;">SEGUIR</button>
+        </div>
+
+        <div id="diary-screen" class="screen">
+            <h2>DIÁRIO DE UM VENCEDOR</h2>
+            <p class="diary-intro">Escreva aqui sua história, aqui você é o ator principal</p>
+            <textarea id="diary-text" rows="10" placeholder="Conte sua história aqui..."></textarea>
+            <button onclick="finishGame()" class="start-btn">FINALIZAR</button>
+        </div>
+
+        <div id="final-screen" class="screen">
+            <button class="share-btn" onclick="shareResults()">COMPARTILHAR</button>
+            
+            <div class="final-message">
+                <h2>VOCÊ É INCRÍVEL!</h2>
+                
+                <div class="star-container">
+                    <span class="star">⭐</span>
+                    <span class="star">⭐</span>
+                    <span class="star">⭐</span>
+                </div>
+                
+                <div class="trophy">🏆</div>
+                
+                <p class="final-text">
+                    Parabéns por completar esta jornada incrível!<br>
+                    Você demonstrou grande capacidade de entender e expressar suas emoções.<br>
+                    Suas respostas foram muito especiais e únicas, assim como você!<br>
+                    Continue sempre acreditando em si mesmo e espalhando amor e bondade por onde passar.
+                </p>
+                
+                <p class="score-text">
+                    Sua pontuação final: <span class="final-score">0</span> pontos
+                </p>
+                
+                <button onclick="restartGame()" class="start-btn">VOLTAR</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
