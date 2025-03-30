@@ -420,6 +420,9 @@ function goToDiary() {
 }
 
 async function finishGame() {
+    // Salvar a pontuação atual no localStorage antes de enviar
+    localStorage.setItem('currentScore', currentScore.toString());
+    
     const gameData = {
         currentUser: localStorage.getItem('currentUser'),
         playerName: localStorage.getItem('playerName'),
@@ -428,20 +431,27 @@ async function finishGame() {
         palavraEscolhida: localStorage.getItem('palavraEscolhida'),
         significado: localStorage.getItem('significado'),
         diario: document.getElementById('diary-text').value,
-        pontuacao: localStorage.getItem('currentScore'),
+        pontuacao: currentScore,
         dataSubmissao: new Date().toISOString()
     };
 
+    console.log('Dados sendo enviados:', gameData);
+
     try {
+        const formData = new FormData();
+        formData.append('form-name', 'game-progress');
+        
+        // Adicionar cada campo ao FormData
+        Object.keys(gameData).forEach(key => {
+            formData.append(key, gameData[key]);
+        });
+
         const response = await fetch('/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                "Accept": "application/x-www-form-urlencoded;charset=UTF-8",
             },
-            body: new URLSearchParams({
-                'form-name': 'game-progress',
-                ...gameData
-            })
+            body: formData
         });
 
         if (!response.ok) {
@@ -449,11 +459,14 @@ async function finishGame() {
         }
 
         // Mostrar tela final
-        showScreen('final-screen');
-        document.querySelector('.final-score').textContent = localStorage.getItem('currentScore');
+        document.getElementById('diary-screen').classList.remove('active');
+        document.getElementById('final-screen').classList.add('active');
+        document.querySelector('.final-score').textContent = currentScore;
         
     } catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro detalhado:', error);
+        console.log('Status da resposta:', error.response?.status);
+        console.log('Texto do erro:', error.response?.statusText);
         alert('Ocorreu um erro ao salvar seus dados. Por favor, tente novamente.');
     }
 }
@@ -639,4 +652,9 @@ function showPresentation() {
 function hidePresentation() {
     document.getElementById('presentation-screen').classList.remove('active');
     document.getElementById('initial-screen').classList.add('active');
-} 
+}
+
+// Adicione este código junto com os outros event listeners
+document.getElementById('diary-text').addEventListener('input', function(e) {
+    localStorage.setItem('diario', e.target.value);
+}); 
