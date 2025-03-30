@@ -22,8 +22,9 @@ function adminLogin() {
 
     if (admin) {
         localStorage.setItem('adminUser', admin.login);
-        showDashboard();
-        loadResponses();
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('dashboard').classList.add('active');
+        loadFormSubmissions();
     } else {
         errorElement.textContent = 'Login ou senha incorretos';
     }
@@ -32,17 +33,13 @@ function adminLogin() {
 // Função para carregar os dados do formulário
 async function loadFormSubmissions() {
     try {
-        const response = await fetch('/.netlify/functions/get-submissions', {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Erro ao carregar dados');
-        }
-
+        const response = await fetch('/.netlify/functions/get-submissions');
         const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
         displayData(data);
         updateUserFilter(data);
     } catch (error) {
@@ -56,17 +53,24 @@ function displayData(submissions) {
     const tableBody = document.getElementById('data-table');
     tableBody.innerHTML = '';
 
+    if (!submissions || submissions.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5">Nenhum dado encontrado</td></tr>';
+        return;
+    }
+
     submissions.forEach(submission => {
         const row = document.createElement('tr');
-        const date = new Date(submission.data.dataSubmissao);
+        const date = new Date(submission.created_at).toLocaleDateString();
         
         row.innerHTML = `
-            <td>${date.toLocaleDateString()}</td>
-            <td>${submission.data.currentUser}</td>
-            <td>${submission.data.playerName}</td>
-            <td>${submission.data.pontuacao}</td>
-            <td class="actions">
-                <button onclick="viewDetails('${submission.id}')" class="view-btn">Ver Detalhes</button>
+            <td>${date}</td>
+            <td>${submission.data.currentUser || 'N/A'}</td>
+            <td>${submission.data.playerName || 'N/A'}</td>
+            <td>${submission.data.pontuacao || '0'}</td>
+            <td>
+                <button onclick="viewDetails('${submission.id}')" class="view-btn">
+                    Ver Detalhes
+                </button>
             </td>
         `;
         
@@ -74,16 +78,25 @@ function displayData(submissions) {
     });
 }
 
-// Função para filtrar os dados
+function updateUserFilter(submissions) {
+    const userFilter = document.getElementById('user-filter');
+    const users = [...new Set(submissions.map(s => s.data.currentUser).filter(Boolean))];
+    
+    userFilter.innerHTML = '<option value="">Todos os usuários</option>';
+    users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user;
+        option.textContent = user;
+        userFilter.appendChild(option);
+    });
+}
+
 function filterData() {
     const dateFilter = document.getElementById('date-filter').value;
     const userFilter = document.getElementById('user-filter').value;
     
     loadFormSubmissions(dateFilter, userFilter);
 }
-
-// Carregar dados quando a página for carregada
-document.addEventListener('DOMContentLoaded', loadFormSubmissions);
 
 // Função para carregar respostas do Netlify Forms
 async function loadResponses() {
@@ -114,18 +127,6 @@ async function loadResponses() {
             </tr>
         `;
     }
-}
-
-function updateUserFilter(submissions) {
-    const userFilter = document.getElementById('user-filter');
-    const users = [...new Set(submissions.map(s => s.data.currentUser))];
-    
-    users.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user;
-        option.textContent = user;
-        userFilter.appendChild(option);
-    });
 }
 
 function applyFilters() {
@@ -229,4 +230,14 @@ window.onclick = function(event) {
     if (event.target === modal) {
         modal.style.display = 'none';
     }
-} 
+}
+
+// Verificar se já está logado ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    const adminUser = localStorage.getItem('adminUser');
+    if (adminUser) {
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('dashboard').classList.add('active');
+        loadFormSubmissions();
+    }
+}); 
